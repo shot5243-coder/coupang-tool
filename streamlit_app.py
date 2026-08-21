@@ -36,10 +36,17 @@ st.markdown("""
 }
 .metric-label { font-size: 0.8rem; color: #666; margin-bottom: 4px; }
 .metric-value { font-size: 1.4rem; font-weight: 700; }
+.app-title {
+    font-size: 1.7rem; font-weight: 800; white-space: nowrap;
+    overflow-x: auto; margin-bottom: 0.2rem;
+}
+@media (max-width: 480px) {
+    .app-title { font-size: 1.15rem; }
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("쿠팡 소싱 통합 리포트")
+st.markdown('<div class="app-title">쿠팡 소싱 통합 리포트</div>', unsafe_allow_html=True)
 st.caption("도매꾹 최저가 · 네이버 검색트렌드 · 연령대별 관심도 · 경쟁강도/기회점수를 한 화면에서 확인")
 
 # ---------------------------------------------------------------------------
@@ -150,6 +157,8 @@ if run:
         # 도매꾹 최저가 상품 카드 목록 (마진 계산 레이아웃)
         # =====================================================================
         st.markdown(f"### 도매꾹 최저가 상품 ({product_count}건)")
+        st.caption("완전히 같은 상품끼리는 묶어서 그 안에서 저가순으로, 서로 다른 상품끼리는 등록순을 유지합니다. "
+                   "그래서 전체를 봤을 때는 가격이 오름차순으로 딱 떨어지지 않을 수 있습니다.")
         if not items:
             st.info("검색된 상품이 없습니다.")
         for it in items:
