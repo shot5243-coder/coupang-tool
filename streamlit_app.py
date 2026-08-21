@@ -16,8 +16,8 @@ import domeggook_client as dome
 import search_trend_client as trend
 import search_trend_by_age as age_mod
 
-st.set_page_config(page_title="쿠팡 소싱 리포트", page_icon="🛒", layout="centered")
-st.title("🛒 쿠팡 소싱 통합 리포트")
+st.set_page_config(page_title="쿠팡 소싱 리포트", page_icon=":shopping_trolley:", layout="centered")
+st.title(":shopping_trolley: 쿠팡 소싱 통합 리포트")
 st.caption("도매꾹 최저가 + 네이버 검색트렌드 + 연령대별 관심도를 한 번에 확인")
 
 # ---------------------------------------------------------------------------
@@ -64,6 +64,39 @@ if run:
             raw_items = client.search_all_pages(keyword, max_pages=2)
             items = dome.group_similar_and_sort(raw_items)[:20]
 
+        # ---- 검색트렌드 (기회점수 계산에 먼저 필요해서 여기서 같이 조회) ----
+        trend_summary = []
+        try:
+            trend_result = trend.search_trend(naver_key_id, naver_key, [keyword], start_str, end_str, "month")
+            trend_summary = trend.summarize(trend_result)
+        except Exception as e:
+            st.error(f"검색트렌드 조회 오류: {e}")
+
+        # ---- 경쟁강도 / 기회점수 ----
+        st.subheader("🎯 경쟁강도 / 기회점수")
+        st.caption("검색량 대신 검색트렌드 지수(0~100 상대값)를 사용한 참고용 지표입니다. "
+                    "도매꾹은 리뷰수 데이터를 제공하지 않아 상품수만 반영했습니다.")
+        if trend_summary and items is not None:
+            search_index = trend_summary[0]["최신지수"]
+            product_count = len(items)
+            if isinstance(search_index, (int, float)) and search_index > 0:
+                competition = round(product_count / search_index, 3)
+                opportunity = round(search_index / (product_count + 1), 2)
+                if opportunity >= 3:
+                    grade, grade_color = "블루오션 후보", "🟢"
+                elif opportunity >= 1:
+                    grade, grade_color = "관찰 필요", "🟡"
+                else:
+                    grade, grade_color = "레드오션", "🔴"
+                c1, c2, c3 = st.columns(3)
+                c1.metric("경쟁강도", competition, help="상품수÷검색지수, 낮을수록 경쟁이 덜함")
+                c2.metric("기회점수", opportunity, help="검색지수÷(상품수+1), 높을수록 선점 기회")
+                c3.metric("등급", f"{grade_color} {grade}")
+            else:
+                st.info("검색지수가 0이라 경쟁강도/기회점수를 계산할 수 없습니다.")
+        else:
+            st.info("도매꾹 상품 또는 검색트렌드 데이터가 부족해 계산할 수 없습니다.")
+
         st.subheader(f"📦 도매꾹 최저가 상품 ({len(items)}건)")
         if not items:
             st.info("검색된 상품이 없습니다.")
@@ -82,24 +115,18 @@ if run:
                 st.markdown(f"[상품 보기]({it.url})")
             st.divider()
 
-        # ---- 검색트렌드 ----
+        # ---- 검색트렌드 그래프 ----
         st.subheader("📈 검색트렌드")
-        with st.spinner("검색트렌드 조회 중..."):
-            try:
-                result = trend.search_trend(naver_key_id, naver_key, [keyword], start_str, end_str, "month")
-                summary = trend.summarize(result)
-                if summary:
-                    t = summary[0]
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("최신지수", t["최신지수"])
-                    c2.metric("평균지수", t["평균지수"])
-                    c3.metric("추세", t["추세"])
-                    groups = result.get("results", [])
-                    if groups and groups[0].get("data"):
-                        chart_data = {d["period"]: d["ratio"] for d in groups[0]["data"]}
-                        st.line_chart(chart_data)
-            except Exception as e:
-                st.error(f"검색트렌드 조회 오류: {e}")
+        if trend_summary:
+            t = trend_summary[0]
+            c1, c2, c3 = st.columns(3)
+            c1.metric("최신지수", t["최신지수"])
+            c2.metric("평균지수", t["평균지수"])
+            c3.metric("추세", t["추세"])
+            groups = trend_result.get("results", [])
+            if groups and groups[0].get("data"):
+                chart_data = {d["period"]: d["ratio"] for d in groups[0]["data"]}
+                st.line_chart(chart_data)
 
         # ---- 연령대별 관심도 ----
         st.subheader("👥 연령대별 관심도")
