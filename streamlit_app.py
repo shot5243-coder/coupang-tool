@@ -16,7 +16,7 @@ import domeggook_client as dome
 import search_trend_client as trend
 import search_trend_by_age as age_mod
 
-st.set_page_config(page_title="쿠팡 소싱 리포트", page_icon="🛒", layout="centered")
+st.set_page_config(page_title="쿠팡 소싱 리포트", layout="centered")
 
 # ---------------------------------------------------------------------------
 # 약간의 카드 스타일 CSS (대시보드 느낌)
@@ -39,7 +39,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🛒 쿠팡 소싱 통합 리포트")
+st.title("쿠팡 소싱 통합 리포트")
 st.caption("도매꾹 최저가 · 네이버 검색트렌드 · 연령대별 관심도 · 경쟁강도/기회점수를 한 화면에서 확인")
 
 # ---------------------------------------------------------------------------
@@ -83,7 +83,7 @@ def grade_badge(grade: str) -> str:
 # 검색 (form으로 감싸면 입력창에서 Enter 키만 눌러도 바로 실행됨)
 # ---------------------------------------------------------------------------
 with st.form("search_form"):
-    keyword = st.text_input("🔍 검색할 키워드", placeholder="예: 캠핑랜턴")
+    keyword = st.text_input("검색할 키워드", placeholder="예: 캠핑랜턴")
     run = st.form_submit_button("검색 실행", type="primary", use_container_width=True)
 
 if run:
@@ -113,7 +113,7 @@ if run:
         # =====================================================================
         # 상단 대시보드 카드: 경쟁강도 / 기회점수 / 등급 (실시간 꿀통 키워드 카드 느낌)
         # =====================================================================
-        st.markdown(f"### 🎯 '{keyword}' 요약")
+        st.markdown(f"### '{keyword}' 요약")
 
         product_count = len(items)
         search_index = trend_summary[0]["최신지수"] if trend_summary else None
@@ -149,7 +149,7 @@ if run:
         # =====================================================================
         # 도매꾹 최저가 상품 카드 목록 (마진 계산 레이아웃)
         # =====================================================================
-        st.markdown(f"### 📦 도매꾹 최저가 상품 ({product_count}건)")
+        st.markdown(f"### 도매꾹 최저가 상품 ({product_count}건)")
         if not items:
             st.info("검색된 상품이 없습니다.")
         for it in items:
@@ -172,14 +172,14 @@ if run:
                             st.markdown(f"**{required_price:,}원**")
                         else:
                             st.markdown("계산불가")
-                    st.markdown(f"[🔗 상품 보기]({it.url})")
+                    st.markdown(f"[상품 보기]({it.url})")
 
         st.divider()
 
         # =====================================================================
         # 검색트렌드 그래프
         # =====================================================================
-        st.markdown("### 📈 검색트렌드")
+        st.markdown("### 검색트렌드")
         if trend_summary:
             t = trend_summary[0]
             c1, c2, c3 = st.columns(3)
@@ -199,7 +199,7 @@ if run:
         # =====================================================================
         # 연령대별 관심도
         # =====================================================================
-        st.markdown("### 👥 연령대별 관심도")
+        st.markdown("### 연령대별 관심도")
         with st.spinner("연령대별 관심도 조회 중..."):
             try:
                 age_summary = age_mod.age_trend(naver_key_id, naver_key, keyword, start_str, end_str)
