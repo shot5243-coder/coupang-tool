@@ -16,15 +16,15 @@ import domeggook_client as dome
 import search_trend_client as trend
 import search_trend_by_age as age_mod
 
-st.set_page_config(page_title="쿠팡 소싱 리포트", page_icon=":shopping_trolley:", layout="centered")
-st.title(":shopping_trolley: 쿠팡 소싱 통합 리포트")
+st.set_page_config(page_title="쿠팡 소싱 리포트", page_icon="🛒", layout="centered")
+st.title("쿠팡 소싱 통합 리포트")
 st.caption("도매꾹 최저가 + 네이버 검색트렌드 + 연령대별 관심도를 한 번에 확인")
 
 # ---------------------------------------------------------------------------
 # API 키 입력 (Secrets에 등록해뒀으면 자동으로 채워짐)
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    st.header("🔑 API 키")
+    st.header("API 키")
 
     def _secret_or_empty(key):
         try:
@@ -44,10 +44,11 @@ with st.sidebar:
     end_date = st.date_input("조회 종료일", value=default_end)
 
 # ---------------------------------------------------------------------------
-# 검색
+# 검색 (form으로 감싸면 입력창에서 Enter 키만 눌러도 바로 실행됨)
 # ---------------------------------------------------------------------------
-keyword = st.text_input("🔍 검색할 키워드", placeholder="예: 캠핑랜턴")
-run = st.button("검색 실행", type="primary", use_container_width=True)
+with st.form("search_form"):
+    keyword = st.text_input("🔍 검색할 키워드", placeholder="예: 캠핑랜턴")
+    run = st.form_submit_button("검색 실행", type="primary", use_container_width=True)
 
 if run:
     if not (dome_key and naver_key_id and naver_key):
@@ -73,7 +74,7 @@ if run:
             st.error(f"검색트렌드 조회 오류: {e}")
 
         # ---- 경쟁강도 / 기회점수 ----
-        st.subheader("🎯 경쟁강도 / 기회점수")
+        st.subheader("경쟁강도 / 기회점수")
         st.caption("검색량 대신 검색트렌드 지수(0~100 상대값)를 사용한 참고용 지표입니다. "
                     "도매꾹은 리뷰수 데이터를 제공하지 않아 상품수만 반영했습니다.")
         if trend_summary and items is not None:
@@ -83,11 +84,11 @@ if run:
                 competition = round(product_count / search_index, 3)
                 opportunity = round(search_index / (product_count + 1), 2)
                 if opportunity >= 3:
-                    grade, grade_color = "블루오션 후보", "🟢"
+                    grade, grade_color = "블루오션 후보", "[블루오션]"
                 elif opportunity >= 1:
-                    grade, grade_color = "관찰 필요", "🟡"
+                    grade, grade_color = "관찰 필요", "[관찰필요]"
                 else:
-                    grade, grade_color = "레드오션", "🔴"
+                    grade, grade_color = "레드오션", "[레드오션]"
                 c1, c2, c3 = st.columns(3)
                 c1.metric("경쟁강도", competition, help="상품수÷검색지수, 낮을수록 경쟁이 덜함")
                 c2.metric("기회점수", opportunity, help="검색지수÷(상품수+1), 높을수록 선점 기회")
@@ -97,7 +98,7 @@ if run:
         else:
             st.info("도매꾹 상품 또는 검색트렌드 데이터가 부족해 계산할 수 없습니다.")
 
-        st.subheader(f"📦 도매꾹 최저가 상품 ({len(items)}건)")
+        st.subheader(f"도매꾹 최저가 상품 ({len(items)}건)")
         if not items:
             st.info("검색된 상품이 없습니다.")
         for it in items:
@@ -116,7 +117,7 @@ if run:
             st.divider()
 
         # ---- 검색트렌드 그래프 ----
-        st.subheader("📈 검색트렌드")
+        st.subheader("검색트렌드")
         if trend_summary:
             t = trend_summary[0]
             c1, c2, c3 = st.columns(3)
@@ -129,7 +130,7 @@ if run:
                 st.line_chart(chart_data)
 
         # ---- 연령대별 관심도 ----
-        st.subheader("👥 연령대별 관심도")
+        st.subheader("연령대별 관심도")
         with st.spinner("연령대별 관심도 조회 중..."):
             try:
                 age_summary = age_mod.age_trend(naver_key_id, naver_key, keyword, start_str, end_str)
