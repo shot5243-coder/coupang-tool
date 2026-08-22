@@ -173,10 +173,6 @@ if run:
                 metric_card("평균지수", str(t["평균지수"]))
             with c3:
                 metric_card("추세", str(t["추세"]))
-            groups = trend_result.get("results", [])
-            if groups and groups[0].get("data"):
-                chart_data = {d["period"]: d["ratio"] for d in groups[0]["data"]}
-                st.line_chart(chart_data)
 
         st.divider()
 
@@ -187,13 +183,40 @@ if run:
         with st.spinner("연령대별 관심도 조회 중..."):
             try:
                 age_summary = age_mod.age_trend(naver_key_id, naver_key, keyword, start_str, end_str)
-                chart_data = {r["연령대"]: r["평균지수"] for r in age_summary
-                              if isinstance(r["평균지수"], (int, float))}
-                if chart_data:
-                    st.bar_chart(chart_data)
                 valid = [r for r in age_summary if isinstance(r["평균지수"], (int, float))]
                 if valid:
-                    st.markdown(f"※ 가장 관심도 높은 연령대: **{valid[0]['연령대']}**")
+                    total = sum(r["평균지수"] for r in valid) or 1
+                    ranked = sorted(valid, key=lambda r: r["평균지수"], reverse=True)
+                    rows_html = ""
+                    for i, r in enumerate(ranked):
+                        share = round(r["평균지수"] / total * 100, 1)
+                        if i == 0:
+                            rows_html += (
+                                f'<div style="display:flex;justify-content:space-between;padding:8px 12px;'
+                                f'font-size:13px;border-top:0.5px solid var(--border);background:var(--bg-accent-muted);">'
+                                f'<span style="font-weight:500;color:var(--text-primary);">{r["연령대"]}</span>'
+                                f'<span style="font-weight:700;color:var(--text-accent);">{share}%</span></div>'
+                            )
+                        else:
+                            rows_html += (
+                                f'<div style="display:flex;justify-content:space-between;padding:8px 12px;'
+                                f'font-size:13px;border-top:0.5px solid var(--border);">'
+                                f'<span style="color:var(--text-primary);">{r["연령대"]}</span>'
+                                f'<span style="color:var(--text-secondary);">{share}%</span></div>'
+                            )
+                    table_html = f'''
+<div style="border:0.5px solid var(--border); border-radius:10px; overflow:hidden;">
+  <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface-1);
+              font-size:12px;color:var(--text-secondary);font-weight:500;">
+    <span>연령대</span><span>비중</span>
+  </div>
+  {rows_html}
+</div>
+'''
+                    st.markdown(table_html, unsafe_allow_html=True)
+                    st.markdown(f"※ 가장 관심도 높은 연령대: **{ranked[0]['연령대']}**")
+                else:
+                    st.info("연령대별 관심도 데이터가 부족합니다.")
             except Exception as e:
                 st.error(f"연령대별 관심도 조회 오류: {e}")
 
