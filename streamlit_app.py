@@ -46,21 +46,27 @@ st.markdown("""
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
 }
 @media (max-width: 480px) {
-    .trend-grid .metric-label { font-size: 0.7rem; }
-    .trend-grid .metric-value { font-size: 1.05rem; }
+    .trend-grid .metric-label { font-size: 0.78rem; }
+    .trend-grid .metric-value { font-size: 1.2rem; }
     .trend-grid .metric-box { padding: 10px 6px; }
 }
 .price-grid {
     display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin: 6px 0; align-items: center;
 }
-.price-item { font-size: 0.85rem; }
-.price-item .price-label { color: var(--text-secondary, #666); font-size: 0.75rem; }
+.price-item { font-size: 0.95rem; }
+.price-item .price-label { color: var(--text-secondary, #666); font-size: 0.82rem; }
 .price-item .price-value { font-weight: 700; }
-.price-link { text-align: right; white-space: nowrap; font-size: 0.85rem; }
+.price-link { text-align: right; white-space: nowrap; font-size: 0.95rem; }
 @media (max-width: 480px) {
-    .price-item { font-size: 0.75rem; }
-    .price-item .price-label { font-size: 0.65rem; }
-    .price-link { font-size: 0.75rem; }
+    .price-item { font-size: 0.85rem; }
+    .price-item .price-label { font-size: 0.72rem; }
+    .price-link { font-size: 0.85rem; }
+}
+.age-table-head { font-size: 0.85rem; }
+.age-table-row { font-size: 1rem; }
+@media (max-width: 480px) {
+    .age-table-head { font-size: 0.78rem; }
+    .age-table-row { font-size: 0.95rem; }
 }
 .app-title {
     font-size: 1.7rem; font-weight: 800; white-space: nowrap;
@@ -213,22 +219,22 @@ if run:
                         share = round(r["평균지수"] / total * 100, 1)
                         if i == 0:
                             rows_html += (
-                                f'<div style="display:flex;justify-content:space-between;padding:8px 12px;'
-                                f'font-size:13px;border-top:0.5px solid var(--border);background:var(--bg-accent-muted);">'
+                                f'<div class="age-table-row" style="display:flex;justify-content:space-between;padding:5px 12px;'
+                                f'border-top:0.5px solid var(--border);background:var(--bg-accent-muted);">'
                                 f'<span style="font-weight:500;color:var(--text-primary);">{r["연령대"]}</span>'
                                 f'<span style="font-weight:700;color:var(--text-accent);">{share}%</span></div>'
                             )
                         else:
                             rows_html += (
-                                f'<div style="display:flex;justify-content:space-between;padding:8px 12px;'
-                                f'font-size:13px;border-top:0.5px solid var(--border);">'
+                                f'<div class="age-table-row" style="display:flex;justify-content:space-between;padding:5px 12px;'
+                                f'border-top:0.5px solid var(--border);">'
                                 f'<span style="color:var(--text-primary);">{r["연령대"]}</span>'
                                 f'<span style="color:var(--text-secondary);">{share}%</span></div>'
                             )
                     table_html = f'''
 <div style="border:0.5px solid var(--border); border-radius:10px; overflow:hidden;">
-  <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface-1);
-              font-size:12px;color:var(--text-secondary);font-weight:500;">
+  <div class="age-table-head" style="display:flex;justify-content:space-between;padding:5px 12px;background:var(--surface-1);
+              color:var(--text-secondary);font-weight:500;">
     <span>연령대</span><span>비중</span>
   </div>
   {rows_html}
