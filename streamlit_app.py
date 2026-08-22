@@ -38,10 +38,11 @@ st.markdown("""
 .metric-value { font-size: 1.4rem; font-weight: 700; }
 .app-title {
     font-size: 1.7rem; font-weight: 800; white-space: nowrap;
-    overflow-x: auto; margin-bottom: 0.2rem;
+    overflow-x: auto; margin-bottom: 0.2rem; text-align: center;
+    color: #185FA5;
 }
 @media (max-width: 480px) {
-    .app-title { font-size: 1.15rem; }
+    .app-title { font-size: 1.4rem; }
 }
 </style>
 """, unsafe_allow_html=True)
