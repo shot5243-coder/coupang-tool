@@ -36,6 +36,12 @@ st.markdown("""
 }
 .metric-label { font-size: 0.8rem; color: #666; margin-bottom: 4px; }
 .metric-value { font-size: 1.4rem; font-weight: 700; }
+.metric-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+@media (max-width: 480px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+}
 .app-title {
     font-size: 1.7rem; font-weight: 800; white-space: nowrap;
     overflow-x: auto; margin-bottom: 0.2rem; text-align: center;
@@ -136,15 +142,15 @@ if run:
             else:
                 grade = "레드오션"
 
-            c1, c2, c3, c4 = st.columns(4)
-            with c1:
-                metric_card("도매꾹 상품수", f"{product_count}건")
-            with c2:
-                metric_card("검색 최신지수", f"{search_index}")
-            with c3:
-                metric_card("경쟁강도", f"{competition}")
-            with c4:
-                metric_card("기회점수", f"{opportunity}")
+            metrics_html = f'''
+<div class="metric-grid">
+  <div class="metric-box"><div class="metric-label">도매꾹 상품수</div><div class="metric-value">{product_count}건</div></div>
+  <div class="metric-box"><div class="metric-label">검색 최신지수</div><div class="metric-value">{search_index}</div></div>
+  <div class="metric-box"><div class="metric-label">경쟁강도</div><div class="metric-value">{competition}</div></div>
+  <div class="metric-box"><div class="metric-label">기회점수</div><div class="metric-value">{opportunity}</div></div>
+</div>
+'''
+            st.markdown(metrics_html, unsafe_allow_html=True)
 
             st.markdown(f"**진입 등급:** {grade_badge(grade)}", unsafe_allow_html=True)
             st.caption("검색량 대신 검색트렌드 지수(0~100 상대값)를 사용한 참고용 지표입니다. "
