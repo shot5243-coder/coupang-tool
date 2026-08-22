@@ -124,6 +124,16 @@ def grade_badge(grade: str) -> str:
 # ---------------------------------------------------------------------------
 with st.form("search_form"):
     keyword = st.text_input("검색할 키워드", placeholder="예: 캠핑랜턴")
+    coupang_review = st.number_input(
+        "쿠팡 리뷰수 (선택, 쿠팡윙 인기상품검색에서 확인한 값)",
+        min_value=0, value=0, step=1,
+        help="0으로 두면 반영하지 않습니다. 입력하면 리뷰수까지 반영한 기회점수를 추가로 보여줍니다."
+    )
+    coupang_views = st.number_input(
+        "쿠팡 조회수 (선택, 쿠팡윙에서 확인한 값)",
+        min_value=0, value=0, step=1000,
+        help="입력하면 리뷰수 대비 조회수 비율을 같이 보여줍니다."
+    )
     run = st.form_submit_button("검색 실행", type="primary", use_container_width=True)
 
 if run:
@@ -181,6 +191,27 @@ if run:
             st.markdown(f"**진입 등급:** {grade_badge(grade)}", unsafe_allow_html=True)
             st.caption("검색량 대신 검색트렌드 지수(0~100 상대값)를 사용한 참고용 지표입니다. "
                        "도매꾹은 리뷰수 데이터를 제공하지 않아 상품수만 반영했습니다.")
+
+            if coupang_review > 0:
+                review_opportunity = round(search_index / ((product_count + 1) * (coupang_review + 1)), 4)
+                st.markdown(f'''
+<div class="metric-grid" style="grid-template-columns: 1fr;">
+  <div class="metric-box"><div class="metric-label">쿠팡 리뷰수 반영 기회점수</div><div class="metric-value">{review_opportunity}</div></div>
+</div>
+''', unsafe_allow_html=True)
+                st.caption(f"쿠팡 리뷰수 {coupang_review}개를 반영한 값입니다. 숫자가 클수록(리뷰는 적고 검색은 많을수록) "
+                           "선점 기회가 좋다는 뜻입니다. 등급 뱃지와는 별도 지표라 직접 비교는 어렵고, "
+                           "이 키워드끼리 여러 번 검색해서 서로 비교하는 용도로 활용하세요.")
+
+                if coupang_views > 0:
+                    view_ratio = round(coupang_review / coupang_views * 100, 2)
+                    st.markdown(f'''
+<div class="metric-grid" style="grid-template-columns: 1fr;">
+  <div class="metric-box"><div class="metric-label">리뷰/조회수 비율</div><div class="metric-value">{view_ratio}%</div></div>
+</div>
+''', unsafe_allow_html=True)
+                    st.caption(f"조회수 {coupang_views:,}회 대비 리뷰수 {coupang_review:,}개 비율입니다. "
+                               "낮을수록 '구경은 많이 하는데 아직 리뷰(구매)는 적은' 상품이라는 뜻입니다.")
         else:
             st.info("검색지수가 부족해 경쟁강도/기회점수를 계산할 수 없습니다.")
 
