@@ -134,6 +134,12 @@ with st.form("search_form"):
         min_value=0, value=0, step=1000,
         help="입력하면 리뷰수 대비 조회수 비율을 같이 보여줍니다."
     )
+    target_margin_pct = st.slider(
+        "목표 마진율 (%)",
+        min_value=0, max_value=100, value=20, step=10,
+        help="10% 단위로 선택 가능합니다. 쿠팡은 저가 경쟁이 치열해서 40%를 다 채우기 어려운 경우가 많으니, "
+             "낮춰서 가격 경쟁력을 확인해보세요. 89% 이상은 쿠팡 수수료 때문에 계산이 불가능할 수 있습니다."
+    )
     run = st.form_submit_button("검색 실행", type="primary", use_container_width=True)
 
 if run:
@@ -289,8 +295,9 @@ if run:
         if not items:
             st.info("검색된 상품이 없습니다.")
         for it in items:
-            cost = it.price + it.deli_fee
-            required_price = dome.calc_required_selling_price(cost)
+            # 배송비는 주문 1건당 고정 비용이라 수량에 따라 개당 부담이 달라지므로,
+            # 상품 1개 원가에 무조건 합산하지 않고 별도로 보여준다.
+            required_price = dome.calc_required_selling_price(it.price, target_margin=target_margin_pct / 100)
             with st.container(border=True):
                 col1, col2 = st.columns([1, 3])
                 with col1:
@@ -301,8 +308,8 @@ if run:
                     price_str = f"{required_price:,}원" if required_price else "계산불가"
                     price_html = f'''
 <div class="price-grid">
-  <div class="price-item"><div class="price-label">원가+배송비</div><div class="price-value">{cost:,}원</div></div>
-  <div class="price-item"><div class="price-label">목표마진(40%) 판매가</div><div class="price-value">{price_str}</div></div>
+  <div class="price-item"><div class="price-label">개당 원가</div><div class="price-value">{it.price:,}원</div></div>
+  <div class="price-item"><div class="price-label">목표마진({target_margin_pct}%) 판매가</div><div class="price-value">{price_str}</div></div>
   <div class="price-link"><a href="{it.url}" target="_blank">상품 보기</a></div>
 </div>
 '''
