@@ -302,10 +302,12 @@ if run:
                    "그래서 전체를 봤을 때는 가격이 오름차순으로 딱 떨어지지 않을 수 있습니다.")
         if not items:
             st.info("검색된 상품이 없습니다.")
+        COUPANG_FEE_RATE = 0.108  # 쿠팡 카테고리 수수료율 (기본 10.8%, 카테고리별로 4~10.9% 편차)
         for it in items:
             # 배송비는 주문 1건당 고정 비용이라 수량에 따라 개당 부담이 달라지므로,
             # 상품 1개 원가에 무조건 합산하지 않고 별도로 보여준다.
-            required_price = dome.calc_required_selling_price(it.price, target_margin=target_margin_pct / 100)
+            # 판매가 = 원가 x (1 + 목표마진율) 단순 마크업 방식
+            required_price = round(it.price * (1 + target_margin_pct / 100))
             with st.container(border=True):
                 col1, col2 = st.columns([1, 3])
                 with col1:
@@ -322,6 +324,18 @@ if run:
 </div>
 '''
                     st.markdown(price_html, unsafe_allow_html=True)
+
+                    if required_price:
+                        coupang_fee = round(required_price * COUPANG_FEE_RATE)
+                        net_profit = required_price - it.price - coupang_fee
+                        net_margin_pct = round(net_profit / required_price * 100, 1) if required_price else 0
+                        st.markdown(
+                            f'<div style="background: var(--bg-accent-muted, #F0F5FF); border-radius: 10px; '
+                            f'padding: 8px 12px; font-size: 0.85rem; margin-top: 4px;">'
+                            f'쿠팡수수료(10.8%) {coupang_fee:,}원 제외 시 → '
+                            f'<b style="color: #185FA5;">순마진 {net_profit:,}원 ({net_margin_pct}%)</b></div>',
+                            unsafe_allow_html=True,
+                        )
 
 st.divider()
 st.caption("API 키는 서버에 저장되지 않으며, 이 세션에서만 사용됩니다.")
