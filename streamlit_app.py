@@ -161,38 +161,6 @@ if run:
         st.divider()
 
         # =====================================================================
-        # 도매꾹 최저가 상품 카드 목록 (마진 계산 레이아웃)
-        # =====================================================================
-        st.markdown(f"### 도매꾹 최저가 상품 ({product_count}건)")
-        st.caption("완전히 같은 상품끼리는 묶어서 그 안에서 저가순으로, 서로 다른 상품끼리는 등록순을 유지합니다. "
-                   "그래서 전체를 봤을 때는 가격이 오름차순으로 딱 떨어지지 않을 수 있습니다.")
-        if not items:
-            st.info("검색된 상품이 없습니다.")
-        for it in items:
-            cost = it.price + it.deli_fee
-            required_price = dome.calc_required_selling_price(cost)
-            with st.container(border=True):
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    if it.thumb:
-                        st.image(it.thumb, use_container_width=True)
-                with col2:
-                    st.markdown(f"**{it.title}**")
-                    cc1, cc2 = st.columns(2)
-                    with cc1:
-                        st.caption("원가+배송비")
-                        st.markdown(f"**{cost:,}원**")
-                    with cc2:
-                        st.caption("목표마진(40%) 판매가")
-                        if required_price:
-                            st.markdown(f"**{required_price:,}원**")
-                        else:
-                            st.markdown("계산불가")
-                    st.markdown(f"[상품 보기]({it.url})")
-
-        st.divider()
-
-        # =====================================================================
         # 검색트렌드 그래프
         # =====================================================================
         st.markdown("### 검색트렌드")
@@ -228,6 +196,38 @@ if run:
                     st.markdown(f"※ 가장 관심도 높은 연령대: **{valid[0]['연령대']}**")
             except Exception as e:
                 st.error(f"연령대별 관심도 조회 오류: {e}")
+
+        st.divider()
+
+        # =====================================================================
+        # 도매꾹 최저가 상품 카드 목록 (마진 계산 레이아웃)
+        # =====================================================================
+        st.markdown(f"### 도매꾹 최저가 상품 ({product_count}건)")
+        st.caption("완전히 같은 상품끼리는 묶어서 그 안에서 저가순으로, 서로 다른 상품끼리는 등록순을 유지합니다. "
+                   "그래서 전체를 봤을 때는 가격이 오름차순으로 딱 떨어지지 않을 수 있습니다.")
+        if not items:
+            st.info("검색된 상품이 없습니다.")
+        for it in items:
+            cost = it.price + it.deli_fee
+            required_price = dome.calc_required_selling_price(cost)
+            with st.container(border=True):
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    if it.thumb:
+                        st.image(it.thumb, use_container_width=True)
+                with col2:
+                    st.markdown(f"**{it.title}**")
+                    cc1, cc2 = st.columns(2)
+                    with cc1:
+                        st.caption("원가+배송비")
+                        st.markdown(f"**{cost:,}원**")
+                    with cc2:
+                        st.caption("목표마진(40%) 판매가")
+                        if required_price:
+                            st.markdown(f"**{required_price:,}원**")
+                        else:
+                            st.markdown("계산불가")
+                    st.markdown(f"[상품 보기]({it.url})")
 
 st.divider()
 st.caption("API 키는 서버에 저장되지 않으며, 이 세션에서만 사용됩니다.")
