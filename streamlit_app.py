@@ -42,6 +42,26 @@ st.markdown("""
 @media (max-width: 480px) {
     .metric-grid { grid-template-columns: repeat(2, 1fr); }
 }
+.trend-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+@media (max-width: 480px) {
+    .trend-grid .metric-label { font-size: 0.7rem; }
+    .trend-grid .metric-value { font-size: 1.05rem; }
+    .trend-grid .metric-box { padding: 10px 6px; }
+}
+.price-grid {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin: 6px 0; align-items: center;
+}
+.price-item { font-size: 0.85rem; }
+.price-item .price-label { color: var(--text-secondary, #666); font-size: 0.75rem; }
+.price-item .price-value { font-weight: 700; }
+.price-link { text-align: right; white-space: nowrap; font-size: 0.85rem; }
+@media (max-width: 480px) {
+    .price-item { font-size: 0.75rem; }
+    .price-item .price-label { font-size: 0.65rem; }
+    .price-link { font-size: 0.75rem; }
+}
 .app-title {
     font-size: 1.7rem; font-weight: 800; white-space: nowrap;
     overflow-x: auto; margin-bottom: 0.2rem; text-align: center;
@@ -166,13 +186,14 @@ if run:
         st.markdown("### 검색트렌드")
         if trend_summary:
             t = trend_summary[0]
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                metric_card("최신지수", str(t["최신지수"]))
-            with c2:
-                metric_card("평균지수", str(t["평균지수"]))
-            with c3:
-                metric_card("추세", str(t["추세"]))
+            trend_html = f'''
+<div class="trend-grid">
+  <div class="metric-box"><div class="metric-label">최신지수</div><div class="metric-value">{t["최신지수"]}</div></div>
+  <div class="metric-box"><div class="metric-label">평균지수</div><div class="metric-value">{t["평균지수"]}</div></div>
+  <div class="metric-box"><div class="metric-label">추세</div><div class="metric-value">{t["추세"]}</div></div>
+</div>
+'''
+            st.markdown(trend_html, unsafe_allow_html=True)
 
         st.divider()
 
@@ -240,17 +261,15 @@ if run:
                         st.image(it.thumb, use_container_width=True)
                 with col2:
                     st.markdown(f"**{it.title}**")
-                    cc1, cc2 = st.columns(2)
-                    with cc1:
-                        st.caption("원가+배송비")
-                        st.markdown(f"**{cost:,}원**")
-                    with cc2:
-                        st.caption("목표마진(40%) 판매가")
-                        if required_price:
-                            st.markdown(f"**{required_price:,}원**")
-                        else:
-                            st.markdown("계산불가")
-                    st.markdown(f"[상품 보기]({it.url})")
+                    price_str = f"{required_price:,}원" if required_price else "계산불가"
+                    price_html = f'''
+<div class="price-grid">
+  <div class="price-item"><div class="price-label">원가+배송비</div><div class="price-value">{cost:,}원</div></div>
+  <div class="price-item"><div class="price-label">목표마진(40%) 판매가</div><div class="price-value">{price_str}</div></div>
+  <div class="price-link"><a href="{it.url}" target="_blank">상품 보기</a></div>
+</div>
+'''
+                    st.markdown(price_html, unsafe_allow_html=True)
 
 st.divider()
 st.caption("API 키는 서버에 저장되지 않으며, 이 세션에서만 사용됩니다.")
