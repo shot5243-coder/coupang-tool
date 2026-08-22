@@ -119,6 +119,20 @@ def grade_badge(grade: str) -> str:
     return f'<span class="grade-badge {cls}">{grade}</span>'
 
 
+target_margin_pct = st.slider(
+    "목표 마진율 (%)",
+    min_value=0, max_value=100, value=20, step=10,
+    help="10% 단위로 선택 가능합니다. 쿠팡은 저가 경쟁이 치열해서 40%를 다 채우기 어려운 경우가 많으니, "
+         "낮춰서 가격 경쟁력을 확인해보세요. 89% 이상은 쿠팡 수수료 때문에 계산이 불가능할 수 있습니다."
+)
+st.markdown(
+    f'<div style="background: var(--bg-accent-muted, #F0F5FF); border-radius: 10px; padding: 8px 14px; '
+    f'text-align: center; margin: 4px 0 16px;">'
+    f'<span style="font-size: 0.85rem; color: #555;">현재 선택: </span>'
+    f'<span style="font-size: 1.15rem; font-weight: 700; color: #185FA5;">{target_margin_pct}%</span></div>',
+    unsafe_allow_html=True,
+)
+
 # ---------------------------------------------------------------------------
 # 검색 (form으로 감싸면 입력창에서 Enter 키만 눌러도 바로 실행됨)
 # ---------------------------------------------------------------------------
@@ -133,12 +147,6 @@ with st.form("search_form"):
         "쿠팡 조회수 (선택, 쿠팡윙에서 확인한 값)",
         min_value=0, value=0, step=1000,
         help="입력하면 리뷰수 대비 조회수 비율을 같이 보여줍니다."
-    )
-    target_margin_pct = st.slider(
-        "목표 마진율 (%)",
-        min_value=0, max_value=100, value=20, step=10,
-        help="10% 단위로 선택 가능합니다. 쿠팡은 저가 경쟁이 치열해서 40%를 다 채우기 어려운 경우가 많으니, "
-             "낮춰서 가격 경쟁력을 확인해보세요. 89% 이상은 쿠팡 수수료 때문에 계산이 불가능할 수 있습니다."
     )
     run = st.form_submit_button("검색 실행", type="primary", use_container_width=True)
 
